@@ -1,5 +1,5 @@
 use crate::{
-    analysis::{response_from, wordlist::WordList, Analyse, MAX_GUESSES},
+    analysis::{response_from, wordlist::WordList, Analyse, WordStats, MAX_GUESSES},
     letter::{print_word, LetterPos, LetterResponse, Responses, Word},
     words::{WORDLIST, WORD_LETTERS},
 };
@@ -107,8 +107,7 @@ impl Analyse for DefaultLevels {
 
     fn recurse(
         &mut self,
-        win_counts: &mut [[usize; MAX_GUESSES]; WORDLIST.len()],
-        loss_counts: &mut [usize; WORDLIST.len()],
+        word_stats: &mut WordStats,
         guesses_made: usize,
         initial: usize,
         correct: Word,
@@ -118,20 +117,14 @@ impl Analyse for DefaultLevels {
             let responses = response_from(correct, guess);
             if responses == [LetterResponse::Correct; WORD_LETTERS] {
                 // win_counts[initial][guesses_made - 1] += 1;
-                unsafe {
-                    *win_counts
-                        .get_unchecked_mut(initial)
-                        .get_unchecked_mut(guesses_made - 1) += 1
-                };
+                unsafe { *word_stats.wins_per_turn.get_unchecked_mut(guesses_made - 1) += 1 };
             } else {
                 self.update(guesses_made, guess, responses);
                 // let is_empty = self.levels[guesses_made].is_empty();
                 let is_empty = unsafe { self.levels.get_unchecked(guesses_made).is_empty() };
                 if is_empty {
                     // loss_counts[initial] += 1;
-                    unsafe {
-                        *loss_counts.get_unchecked_mut(initial) += 1;
-                    }
+                    word_stats.losses += 1;
                 } else {
                     // let ind_max = self.levels[guesses_made].len();
                     let ind_max = unsafe { self.levels.get_unchecked(guesses_made).len() };
@@ -139,22 +132,13 @@ impl Analyse for DefaultLevels {
                         // let word = self.levels[guesses_made][ind];
                         let word =
                             unsafe { *self.levels.get_unchecked(guesses_made).get_unchecked(ind) };
-                        self.recurse(
-                            win_counts,
-                            loss_counts,
-                            guesses_made + 1,
-                            initial,
-                            correct,
-                            word,
-                        );
+                        self.recurse(word_stats, guesses_made + 1, initial, correct, word);
                     }
                 }
             }
         } else {
             // loss_counts[initial] += 1;
-            unsafe {
-                *loss_counts.get_unchecked_mut(initial) += 1;
-            }
+            word_stats.losses += 1;
         }
     }
 
