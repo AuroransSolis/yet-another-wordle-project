@@ -12,7 +12,7 @@ pub mod wordbuf;
 pub mod wordlist;
 
 pub const MAX_GUESSES: usize = 6;
-const MAX_CW: usize = 5;
+const MAX_CW: usize = 4 * 1;
 
 pub trait Analyse: Copy + Default + Send + Sync {
     fn update(&mut self, depth: usize, guessed: Word, responses: Responses);
@@ -126,19 +126,16 @@ pub fn best_first_guess_rayon_fm<T: Analyse>() -> [WordStats; WORDLIST.len()] {
     let mut word_stats = WORDLIST
         .into_par_iter()
         .take(MAX_CW)
-        .flat_map_iter(|cw| {
+        .flat_map(|correct_word| {
             WORDLIST
-                .into_iter()
+                .into_par_iter()
                 .enumerate()
-                .map(move |(i, g)| (cw, i, g))
+                .map(move |(initial, guess)| {
+                    let mut iter_stats = WordStats::new(correct_word, [0; MAX_GUESSES], 0);
+                    T::default().recurse(&mut iter_stats, 1, initial, correct_word, guess);
+                    (initial, iter_stats)
+                })
         })
-        .map(
-            |(correct_word, initial, guess)| {
-                let mut iter_stats = WordStats::new(correct_word, [0; MAX_GUESSES], 0);
-                T::default().recurse(&mut iter_stats, 1, initial, correct_word, guess);
-                (initial, iter_stats)
-            },
-        )
         .fold(
             || DEFAULT_WORD_STATS,
             |mut all_ws, (word, ws)| {

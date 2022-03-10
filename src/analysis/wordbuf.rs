@@ -1,6 +1,6 @@
 use crate::{
     analysis::{response_from, Analyse, WordStats, MAX_GUESSES},
-    letter::{print_word, LetterPos, LetterResponse, Responses, Word},
+    letter::{LetterPos, LetterResponse, Responses, Word},
     words::{WORDLIST, WORD_LETTERS},
 };
 use std::{
