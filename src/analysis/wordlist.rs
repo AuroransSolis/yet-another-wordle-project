@@ -1,8 +1,4 @@
 use crate::letter::Word;
-use std::{
-    borrow::{Borrow, BorrowMut},
-    ops::{Deref, DerefMut},
-};
 
 #[derive(Clone, Copy, Debug)]
 pub struct WordList<const N: usize> {
@@ -19,6 +15,10 @@ impl<const N: usize> WordList<N> {
         self.len
     }
 
+    pub fn is_empty(&self) -> bool {
+        self.len == 0
+    }
+
     unsafe fn set_len(&mut self, len: usize) {
         self.len = len;
     }
@@ -31,48 +31,8 @@ impl<const N: usize> WordList<N> {
         *self.words.get_unchecked_mut(self.len) = new;
         self.set_len(self.len + 1);
     }
-}
 
-impl<const N: usize> Deref for WordList<N> {
-    type Target = [Word];
-
-    #[inline]
-    fn deref(&self) -> &[Word] {
-        &self.words[0..self.len]
-    }
-}
-
-impl<const N: usize> DerefMut for WordList<N> {
-    #[inline]
-    fn deref_mut(&mut self) -> &mut [Word] {
-        &mut self.words[0..self.len]
-    }
-}
-
-impl<const N: usize> AsRef<[Word]> for WordList<N> {
-    #[inline]
-    fn as_ref(&self) -> &[Word] {
-        self
-    }
-}
-
-impl<const N: usize> AsMut<[Word]> for WordList<N> {
-    #[inline]
-    fn as_mut(&mut self) -> &mut [Word] {
-        self
-    }
-}
-
-impl<const N: usize> Borrow<[Word]> for WordList<N> {
-    #[inline]
-    fn borrow(&self) -> &[Word] {
-        self
-    }
-}
-
-impl<const N: usize> BorrowMut<[Word]> for WordList<N> {
-    #[inline]
-    fn borrow_mut(&mut self) -> &mut [Word] {
-        self
+    pub unsafe fn get_unchecked(&self, ind: usize) -> &Word {
+        self.words.get_unchecked(ind)
     }
 }

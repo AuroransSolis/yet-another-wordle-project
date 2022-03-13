@@ -40,27 +40,29 @@ fn main() {
     //     .take(3)
     //     .enumerate()
     //     .for_each(|(rank, stats)| stats.display_rank_with_indent(rank, 0, 4));
-    println!("bfg-rfg");
-    let words_stats_3 = analysis::best_first_guess_rayon_fg::<DefaultLevels>();
-    words_stats_3
-        .iter()
-        .take(3)
-        .enumerate()
-        .for_each(|(rank, stats)| stats.display_rank_with_indent(rank, 0, 4));
-    println!("bfg-rcw");
-    let words_stats_4 = analysis::best_first_guess_rayon_cw::<DefaultLevels>();
-    words_stats_4
-        .iter()
-        .take(3)
-        .enumerate()
-        .for_each(|(rank, stats)| stats.display_rank_with_indent(rank, 0, 4));
-    println!("bfg-rfm");
+    // println!("bfg-rfg");
+    // let words_stats_3 = analysis::best_first_guess_rayon_fg::<DefaultLevels>();
+    // words_stats_3
+    //     .iter()
+    //     .take(3)
+    //     .enumerate()
+    //     .for_each(|(rank, stats)| stats.display_rank_with_indent(rank + 1, 0, 4));
+    // words_stats_3[words_stats_3.len() - 1].display_rank_with_indent(words_stats_3.len(), 0, 4);
+    // println!("bfg-rcw");
+    // let words_stats_4 = analysis::best_first_guess_rayon_cw::<DefaultLevels>();
+    // words_stats_4
+    //     .iter()
+    //     .take(3)
+    //     .enumerate()
+    //     .for_each(|(rank, stats)| stats.display_rank_with_indent(rank + 1, 0, 4));
+    // words_stats_4[words_stats_4.len() - 1].display_rank_with_indent(words_stats_4.len(), 0, 4);
+    // println!("bfg-rfm");
     let words_stats_5 = analysis::best_first_guess_rayon_fm::<DefaultLevels>();
     words_stats_5
         .iter()
-        .take(3)
         .enumerate()
-        .for_each(|(rank, stats)| stats.display_rank_with_indent(rank, 0, 4));
+        .for_each(|(rank, stats)| stats.display_rank_with_indent(rank + 1, 0, 4));
+    words_stats_5[words_stats_5.len() - 1].display_rank_with_indent(words_stats_5.len(), 0, 4);
     // println!("same results? {}", words_stats_1 == words_stats_2);
     // let mut wordbuf = DefaultWordBuf::default();
     // let mut levels = DefaultLevels::default();

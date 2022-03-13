@@ -12,7 +12,7 @@ pub mod wordbuf;
 pub mod wordlist;
 
 pub const MAX_GUESSES: usize = 6;
-const MAX_CW: usize = 4 * 1;
+const MAX_CW: usize = 2315;
 
 pub trait Analyse: Copy + Default + Send + Sync {
     fn update(&mut self, depth: usize, guessed: Word, responses: Responses);
@@ -36,7 +36,7 @@ pub fn best_first_guess<T: Analyse>() -> [WordStats; WORDLIST.len()] {
         let correct_start = Instant::now();
         for (initial, guess) in WORDLIST.into_iter().enumerate() {
             // let initial_start = Instant::now();
-            analyser.recurse(&mut word_stats[initial], 1, initial, correct_word, guess);
+            analyser.recurse(&mut word_stats[initial], 0, initial, correct_word, guess);
             // let initial_end = initial_start.elapsed();
             // println!("    g0: {initial:>4} | elapsed: {initial_end:?}");
             analyser.at_sg_end();
@@ -52,7 +52,7 @@ pub fn best_first_guess<T: Analyse>() -> [WordStats; WORDLIST.len()] {
 
 pub fn best_first_guess_rayon_fg<T: Analyse>() -> [WordStats; WORDLIST.len()] {
     let _ = rayon::ThreadPoolBuilder::new()
-        .stack_size(1 << 25)
+        .stack_size(1 << 26)
         .build_global();
     let mut word_stats = DEFAULT_WORD_STATS;
     let total_start = Instant::now();
@@ -65,7 +65,7 @@ pub fn best_first_guess_rayon_fg<T: Analyse>() -> [WordStats; WORDLIST.len()] {
             .map(|(initial, guess)| {
                 let mut analyser = T::default();
                 let mut word_stats = WordStats::new(guess, [0; MAX_GUESSES], 0);
-                analyser.recurse(&mut word_stats, 1, initial, correct_word, guess);
+                analyser.recurse(&mut word_stats, 0, initial, correct_word, guess);
                 (initial, word_stats)
             })
             .fold(
@@ -75,7 +75,10 @@ pub fn best_first_guess_rayon_fg<T: Analyse>() -> [WordStats; WORDLIST.len()] {
                     all_ws
                 },
             )
-            .reduce(|| DEFAULT_WORD_STATS, |ws1, ws2| combine_wordstats(ws1, &ws2));
+            .reduce(
+                || DEFAULT_WORD_STATS,
+                |ws1, ws2| combine_wordstats(ws1, &ws2),
+            );
         word_stats = combine_wordstats(word_stats, &iter_stats);
         let correct_end = correct_start.elapsed();
         println!("cw: {correct:>4} | elapsed: {correct_end:?}");
@@ -88,7 +91,7 @@ pub fn best_first_guess_rayon_fg<T: Analyse>() -> [WordStats; WORDLIST.len()] {
 
 pub fn best_first_guess_rayon_cw<T: Analyse>() -> [WordStats; WORDLIST.len()] {
     let _ = rayon::ThreadPoolBuilder::new()
-        .stack_size(1 << 25)
+        .stack_size(1 << 26)
         .build_global();
     let total_start = Instant::now();
     let mut word_stats = WORDLIST
@@ -102,7 +105,7 @@ pub fn best_first_guess_rayon_cw<T: Analyse>() -> [WordStats; WORDLIST.len()] {
             // let correct_start = Instant::now();
             for (initial, guess) in WORDLIST.into_iter().enumerate() {
                 // let initial_start = Instant::now();
-                analyser.recurse(&mut iter_stats[initial], 1, initial, correct_word, guess);
+                analyser.recurse(&mut iter_stats[initial], 0, initial, correct_word, guess);
                 // let initial_end = initial_start.elapsed();
                 // println!("    g0: {initial:>4} | elapsed: {initial_end:?}");
                 analyser.at_sg_end();
@@ -111,7 +114,10 @@ pub fn best_first_guess_rayon_cw<T: Analyse>() -> [WordStats; WORDLIST.len()] {
             println!("cw: {correct:>4} | elapsed: {correct_end:?}");
             iter_stats
         })
-        .reduce(|| DEFAULT_WORD_STATS, |ws1, ws2| combine_wordstats(ws1, &ws2));
+        .reduce(
+            || DEFAULT_WORD_STATS,
+            |ws1, ws2| combine_wordstats(ws1, &ws2),
+        );
     let total_end = total_start.elapsed();
     println!("total: {total_end:?}");
     word_stats.sort_unstable_by(|s1, s2| s1.cmp(s2).reverse());
@@ -120,19 +126,21 @@ pub fn best_first_guess_rayon_cw<T: Analyse>() -> [WordStats; WORDLIST.len()] {
 
 pub fn best_first_guess_rayon_fm<T: Analyse>() -> [WordStats; WORDLIST.len()] {
     let _ = rayon::ThreadPoolBuilder::new()
-        .stack_size(1 << 25)
+        .stack_size(1 << 26)
         .build_global();
     let total_start = Instant::now();
     let mut word_stats = WORDLIST
         .into_par_iter()
         .take(MAX_CW)
-        .flat_map(|correct_word| {
+        .enumerate()
+        .inspect(|(num, word)| println!("starting analysis of {num:>4} ({word:?})"))
+        .flat_map(|(_, correct_word)| {
             WORDLIST
                 .into_par_iter()
                 .enumerate()
                 .map(move |(initial, guess)| {
                     let mut iter_stats = WordStats::new(correct_word, [0; MAX_GUESSES], 0);
-                    T::default().recurse(&mut iter_stats, 1, initial, correct_word, guess);
+                    T::default().recurse(&mut iter_stats, 0, initial, correct_word, guess);
                     (initial, iter_stats)
                 })
         })
@@ -143,7 +151,10 @@ pub fn best_first_guess_rayon_fm<T: Analyse>() -> [WordStats; WORDLIST.len()] {
                 all_ws
             },
         )
-        .reduce(|| DEFAULT_WORD_STATS, |ws1, ws2| combine_wordstats(ws1, &ws2));
+        .reduce(
+            || DEFAULT_WORD_STATS,
+            |ws1, ws2| combine_wordstats(ws1, &ws2),
+        );
     let total_end = total_start.elapsed();
     println!("total: {total_end:?}");
     word_stats.sort_unstable_by(|s1, s2| s1.cmp(s2).reverse());

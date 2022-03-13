@@ -1,11 +1,14 @@
 use crate::letter::{Letter, Word};
 
 pub const WORD_LETTERS: usize = 5;
+pub const NUM_ALLOWED_WORDS: usize = 12972;
+pub const NUM_POSSIBLE_WORDS: usize = 2315;
 
 #[allow(dead_code)]
-const ALLOWED_WORDS_BYTES: [u8; 77832] = *include_bytes!("../allowed-wordlist.txt");
+const ALLOWED_WORDS_BYTES: [u8; (WORD_LETTERS + 1) * NUM_ALLOWED_WORDS] =
+    *include_bytes!("../allowed-wordlist.txt");
 #[allow(dead_code)]
-pub const ALLOWED_WORDS: [Word; 12972] = {
+pub const ALLOWED_WORDS: [Word; NUM_ALLOWED_WORDS] = {
     let mut words = [[Letter::A; WORD_LETTERS]; 12972];
     let mut i = 0;
     let mut j = 0;
@@ -27,9 +30,10 @@ pub const ALLOWED_WORDS: [Word; 12972] = {
 };
 
 #[allow(dead_code)]
-const POSSIBLE_WORDS_BYTES: [u8; 13890] = *include_bytes!("../possible-wordlist.txt");
+const POSSIBLE_WORDS_BYTES: [u8; (WORD_LETTERS + 1) * NUM_POSSIBLE_WORDS] =
+    *include_bytes!("../possible-wordlist.txt");
 #[allow(dead_code)]
-pub const POSSIBLE_WORDS: [Word; 2315] = {
+pub const POSSIBLE_WORDS: [Word; NUM_POSSIBLE_WORDS] = {
     let mut words = [[Letter::A; WORD_LETTERS]; 2315];
     let mut i = 0;
     let mut j = 0;

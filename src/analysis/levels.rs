@@ -48,14 +48,15 @@ impl DefaultLevels {
     }
 
     pub fn update_simd(&mut self, depth: usize, guessed: Word, responses: Responses) {
-        // self.levels[depth].clear();
-        unsafe { self.levels.get_unchecked_mut(depth).clear() };
-        let previous = depth - 1;
-        // let words_max = self.levels[previous].len();
-        let words_max = unsafe { self.levels.get_unchecked(previous).len() };
+        let next = depth + 1;
+        unsafe {
+            self.levels.get_unchecked_mut(next).clear();
+        }
+        // let words_max = self.levels[depth].len();
+        let words_max = unsafe { self.levels.get_unchecked(depth).len() };
         'words: for i in 0..words_max {
             // let word = self.levels[previous][i];
-            let word = unsafe { *self.levels.get_unchecked(previous).get_unchecked(i) };
+            let word = unsafe { *self.levels.get_unchecked(depth).get_unchecked(i) };
             for pos in LetterPos::P0..=LetterPos::P4 {
                 let response = responses[pos as usize];
                 let guess = guessed[pos as usize];
@@ -76,7 +77,8 @@ impl DefaultLevels {
                                 ]))
                                 .any()
                     }
-                    LetterResponse::Exclude => !(simd_word(word).lanes_eq(simd_word([guess; 5]))
+                    LetterResponse::Exclude => !(simd_word(word)
+                        .lanes_eq(simd_word([guess; WORD_LETTERS]))
                         & Mask::from_array(WORD_MASK))
                     .any(),
                 };
@@ -85,7 +87,7 @@ impl DefaultLevels {
                 }
             }
             // unsafe { self.levels[depth].push_unchecked(word) };
-            unsafe { self.levels.get_unchecked_mut(depth).push_unchecked(word) };
+            unsafe { self.levels.get_unchecked_mut(next).push_unchecked(word) };
         }
     }
 }
@@ -113,26 +115,27 @@ impl Analyse for DefaultLevels {
         correct: Word,
         guess: Word,
     ) {
-        if guesses_made <= MAX_GUESSES {
+        if guesses_made < MAX_GUESSES {
             let responses = response_from(correct, guess);
             if responses == [LetterResponse::Correct; WORD_LETTERS] {
                 // win_counts[initial][guesses_made - 1] += 1;
-                unsafe { *word_stats.wins_per_turn.get_unchecked_mut(guesses_made - 1) += 1 };
+                unsafe { *word_stats.wins_per_turn.get_unchecked_mut(guesses_made) += 1 };
             } else {
+                let next_guess = guesses_made + 1;
                 self.update(guesses_made, guess, responses);
                 // let is_empty = self.levels[guesses_made].is_empty();
-                let is_empty = unsafe { self.levels.get_unchecked(guesses_made).is_empty() };
-                if is_empty {
+                let next_is_empty = unsafe { self.levels.get_unchecked(next_guess).is_empty() };
+                if next_is_empty {
                     // loss_counts[initial] += 1;
                     word_stats.losses += 1;
                 } else {
                     // let ind_max = self.levels[guesses_made].len();
-                    let ind_max = unsafe { self.levels.get_unchecked(guesses_made).len() };
+                    let ind_max = unsafe { self.levels.get_unchecked(next_guess).len() };
                     for ind in 0..ind_max {
                         // let word = self.levels[guesses_made][ind];
                         let word =
-                            unsafe { *self.levels.get_unchecked(guesses_made).get_unchecked(ind) };
-                        self.recurse(word_stats, guesses_made + 1, initial, correct, word);
+                            unsafe { *self.levels.get_unchecked(next_guess).get_unchecked(ind) };
+                        self.recurse(word_stats, next_guess, initial, correct, word);
                     }
                 }
             }
