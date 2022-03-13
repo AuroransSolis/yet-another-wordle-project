@@ -68,9 +68,15 @@ pub fn bench_wordbuf_update(c: &mut Criterion) {
         b.iter_batched(
             || {
                 let guessed = *WORDLIST.choose(&mut rng).unwrap();
-                (DefaultWordBuf::default(), guessed, [LetterResponse::Correct; 5])
+                (
+                    DefaultWordBuf::default(),
+                    guessed,
+                    [LetterResponse::Correct; 5],
+                )
             },
-            |(mut wordlist, guessed, responses)| black_box(wordlist.update_iter(guessed, responses)),
+            |(mut wordlist, guessed, responses)| {
+                black_box(wordlist.update_iter(guessed, responses))
+            },
             BatchSize::SmallInput,
         )
     });
@@ -78,9 +84,15 @@ pub fn bench_wordbuf_update(c: &mut Criterion) {
         b.iter_batched(
             || {
                 let guessed = *WORDLIST.choose(&mut rng).unwrap();
-                (DefaultWordBuf::default(), guessed, [LetterResponse::Include; 5])
+                (
+                    DefaultWordBuf::default(),
+                    guessed,
+                    [LetterResponse::Include; 5],
+                )
             },
-            |(mut wordlist, guessed, responses)| black_box(wordlist.update_iter(guessed, responses)),
+            |(mut wordlist, guessed, responses)| {
+                black_box(wordlist.update_iter(guessed, responses))
+            },
             BatchSize::SmallInput,
         )
     });
@@ -88,9 +100,15 @@ pub fn bench_wordbuf_update(c: &mut Criterion) {
         b.iter_batched(
             || {
                 let guessed = *WORDLIST.choose(&mut rng).unwrap();
-                (DefaultWordBuf::default(), guessed, [LetterResponse::Exclude; 5])
+                (
+                    DefaultWordBuf::default(),
+                    guessed,
+                    [LetterResponse::Exclude; 5],
+                )
             },
-            |(mut wordlist, guessed, responses)| black_box(wordlist.update_iter(guessed, responses)),
+            |(mut wordlist, guessed, responses)| {
+                black_box(wordlist.update_iter(guessed, responses))
+            },
             BatchSize::SmallInput,
         )
     });
@@ -99,9 +117,15 @@ pub fn bench_wordbuf_update(c: &mut Criterion) {
             || {
                 let correct = *WORDLIST.choose(&mut rng).unwrap();
                 let guessed = *WORDLIST.choose(&mut rng).unwrap();
-                (DefaultWordBuf::default(), guessed, response_from(correct, guessed))
+                (
+                    DefaultWordBuf::default(),
+                    guessed,
+                    response_from(correct, guessed),
+                )
             },
-            |(mut wordlist, guessed, responses)| black_box(wordlist.update_iter(guessed, responses)),
+            |(mut wordlist, guessed, responses)| {
+                black_box(wordlist.update_iter(guessed, responses))
+            },
             BatchSize::SmallInput,
         )
     });
@@ -109,9 +133,15 @@ pub fn bench_wordbuf_update(c: &mut Criterion) {
         b.iter_batched(
             || {
                 let guessed = *WORDLIST.choose(&mut rng).unwrap();
-                (DefaultWordBuf::default(), guessed, [LetterResponse::Correct; 5])
+                (
+                    DefaultWordBuf::default(),
+                    guessed,
+                    [LetterResponse::Correct; 5],
+                )
             },
-            |(mut wordlist, guessed, responses)| black_box(wordlist.update_simd(guessed, responses)),
+            |(mut wordlist, guessed, responses)| {
+                black_box(wordlist.update_simd(guessed, responses))
+            },
             BatchSize::SmallInput,
         )
     });
@@ -119,9 +149,15 @@ pub fn bench_wordbuf_update(c: &mut Criterion) {
         b.iter_batched(
             || {
                 let guessed = *WORDLIST.choose(&mut rng).unwrap();
-                (DefaultWordBuf::default(), guessed, [LetterResponse::Include; 5])
+                (
+                    DefaultWordBuf::default(),
+                    guessed,
+                    [LetterResponse::Include; 5],
+                )
             },
-            |(mut wordlist, guessed, responses)| black_box(wordlist.update_simd(guessed, responses)),
+            |(mut wordlist, guessed, responses)| {
+                black_box(wordlist.update_simd(guessed, responses))
+            },
             BatchSize::SmallInput,
         )
     });
@@ -129,9 +165,15 @@ pub fn bench_wordbuf_update(c: &mut Criterion) {
         b.iter_batched(
             || {
                 let guessed = *WORDLIST.choose(&mut rng).unwrap();
-                (DefaultWordBuf::default(), guessed, [LetterResponse::Exclude; 5])
+                (
+                    DefaultWordBuf::default(),
+                    guessed,
+                    [LetterResponse::Exclude; 5],
+                )
             },
-            |(mut wordlist, guessed, responses)| black_box(wordlist.update_simd(guessed, responses)),
+            |(mut wordlist, guessed, responses)| {
+                black_box(wordlist.update_simd(guessed, responses))
+            },
             BatchSize::SmallInput,
         )
     });
@@ -140,9 +182,15 @@ pub fn bench_wordbuf_update(c: &mut Criterion) {
             || {
                 let correct = *WORDLIST.choose(&mut rng).unwrap();
                 let guessed = *WORDLIST.choose(&mut rng).unwrap();
-                (DefaultWordBuf::default(), guessed, response_from(correct, guessed))
+                (
+                    DefaultWordBuf::default(),
+                    guessed,
+                    response_from(correct, guessed),
+                )
             },
-            |(mut wordlist, guessed, responses)| black_box(wordlist.update_simd(guessed, responses)),
+            |(mut wordlist, guessed, responses)| {
+                black_box(wordlist.update_simd(guessed, responses))
+            },
             BatchSize::SmallInput,
         )
     });
@@ -154,7 +202,11 @@ pub fn bench_levels_update(c: &mut Criterion) {
         b.iter_batched(
             || {
                 let guessed = *WORDLIST.choose(&mut rng).unwrap();
-                (DefaultLevels::default(), guessed, [LetterResponse::Correct; 5])
+                (
+                    DefaultLevels::default(),
+                    guessed,
+                    [LetterResponse::Correct; 5],
+                )
             },
             |(mut levels, guessed, responses)| black_box(levels.update_cont(1, guessed, responses)),
             BatchSize::SmallInput,
@@ -164,7 +216,11 @@ pub fn bench_levels_update(c: &mut Criterion) {
         b.iter_batched(
             || {
                 let guessed = *WORDLIST.choose(&mut rng).unwrap();
-                (DefaultLevels::default(), guessed, [LetterResponse::Include; 5])
+                (
+                    DefaultLevels::default(),
+                    guessed,
+                    [LetterResponse::Include; 5],
+                )
             },
             |(mut levels, guessed, responses)| black_box(levels.update_cont(1, guessed, responses)),
             BatchSize::SmallInput,
@@ -174,7 +230,11 @@ pub fn bench_levels_update(c: &mut Criterion) {
         b.iter_batched(
             || {
                 let guessed = *WORDLIST.choose(&mut rng).unwrap();
-                (DefaultLevels::default(), guessed, [LetterResponse::Exclude; 5])
+                (
+                    DefaultLevels::default(),
+                    guessed,
+                    [LetterResponse::Exclude; 5],
+                )
             },
             |(mut levels, guessed, responses)| black_box(levels.update_cont(1, guessed, responses)),
             BatchSize::SmallInput,
@@ -185,7 +245,11 @@ pub fn bench_levels_update(c: &mut Criterion) {
             || {
                 let correct = *WORDLIST.choose(&mut rng).unwrap();
                 let guessed = *WORDLIST.choose(&mut rng).unwrap();
-                (DefaultLevels::default(), guessed, response_from(correct, guessed))
+                (
+                    DefaultLevels::default(),
+                    guessed,
+                    response_from(correct, guessed),
+                )
             },
             |(mut levels, guessed, responses)| black_box(levels.update_cont(1, guessed, responses)),
             BatchSize::SmallInput,
@@ -195,7 +259,11 @@ pub fn bench_levels_update(c: &mut Criterion) {
         b.iter_batched(
             || {
                 let guessed = *WORDLIST.choose(&mut rng).unwrap();
-                (DefaultLevels::default(), guessed, [LetterResponse::Correct; 5])
+                (
+                    DefaultLevels::default(),
+                    guessed,
+                    [LetterResponse::Correct; 5],
+                )
             },
             |(mut levels, guessed, responses)| black_box(levels.update_simd(1, guessed, responses)),
             BatchSize::SmallInput,
@@ -205,7 +273,11 @@ pub fn bench_levels_update(c: &mut Criterion) {
         b.iter_batched(
             || {
                 let guessed = *WORDLIST.choose(&mut rng).unwrap();
-                (DefaultLevels::default(), guessed, [LetterResponse::Include; 5])
+                (
+                    DefaultLevels::default(),
+                    guessed,
+                    [LetterResponse::Include; 5],
+                )
             },
             |(mut levels, guessed, responses)| black_box(levels.update_simd(1, guessed, responses)),
             BatchSize::SmallInput,
@@ -215,7 +287,11 @@ pub fn bench_levels_update(c: &mut Criterion) {
         b.iter_batched(
             || {
                 let guessed = *WORDLIST.choose(&mut rng).unwrap();
-                (DefaultLevels::default(), guessed, [LetterResponse::Exclude; 5])
+                (
+                    DefaultLevels::default(),
+                    guessed,
+                    [LetterResponse::Exclude; 5],
+                )
             },
             |(mut levels, guessed, responses)| black_box(levels.update_simd(1, guessed, responses)),
             BatchSize::SmallInput,
@@ -226,7 +302,11 @@ pub fn bench_levels_update(c: &mut Criterion) {
             || {
                 let correct = *WORDLIST.choose(&mut rng).unwrap();
                 let guessed = *WORDLIST.choose(&mut rng).unwrap();
-                (DefaultLevels::default(), guessed, response_from(correct, guessed))
+                (
+                    DefaultLevels::default(),
+                    guessed,
+                    response_from(correct, guessed),
+                )
             },
             |(mut levels, guessed, responses)| black_box(levels.update_simd(1, guessed, responses)),
             BatchSize::SmallInput,

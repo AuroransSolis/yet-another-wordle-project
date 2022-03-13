@@ -1,6 +1,6 @@
 use crate::{
-    analysis::{response_from, Analyse, MAX_GUESSES},
-    letter::{print_word, LetterPos, LetterResponse, Responses, Word},
+    analysis::{response_from, Analyse, WordStats, MAX_GUESSES},
+    letter::{LetterPos, LetterResponse, Responses, Word},
     words::{WORDLIST, WORD_LETTERS},
 };
 use std::{
@@ -108,8 +108,7 @@ impl Analyse for DefaultWordBuf {
 
     fn recurse(
         &mut self,
-        win_counts: &mut [[usize; MAX_GUESSES]; WORDLIST.len()],
-        loss_counts: &mut [usize; WORDLIST.len()],
+        word_stats: &mut WordStats,
         guesses_made: usize,
         initial: usize,
         correct: Word,
@@ -118,27 +117,23 @@ impl Analyse for DefaultWordBuf {
         if guesses_made <= MAX_GUESSES {
             let responses = response_from(correct, guess);
             if responses == [LetterResponse::Correct; WORD_LETTERS] {
-                win_counts[initial][guesses_made - 1] += 1;
+                // win_counts[initial][guesses_made - 1] += 1;
+                unsafe { *word_stats.wins_per_turn.get_unchecked_mut(guesses_made - 1) += 1 };
             } else {
                 self.update(guesses_made, guess, responses);
                 if self.is_empty() {
-                    loss_counts[initial] += 1;
+                    // loss_counts[initial] += 1;
+                    word_stats.losses += 1;
                 } else {
                     for &word in self.iter() {
                         let mut new = *self;
-                        new.recurse(
-                            win_counts,
-                            loss_counts,
-                            guesses_made + 1,
-                            initial,
-                            correct,
-                            word,
-                        );
+                        new.recurse(word_stats, guesses_made + 1, initial, correct, word);
                     }
                 }
             }
         } else {
-            loss_counts[initial] += 1;
+            // loss_counts[initial] += 1;
+            word_stats.losses += 1;
         }
     }
 
